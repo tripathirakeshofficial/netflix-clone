@@ -10,7 +10,7 @@
 </p>
 
 > Netflix Clone using ReactJS, Hooks and Redux. It uses Firebase Authentication, Firestore Database and Stripe Payments for users and subscriptions. Also uses Firebase Extension with Stripe for managing subscription plans. 
-
+>
 >For successful checkout from India, stripe test card details are: 4000 0035 6000 0008, Any future date for MM/YY, any 3 digit for CVV. Movie details have been pulled from TMDB API by using Axios.
 
 ### ✨ [Demo](https://netflix-clone-a6e7b.web.app)
