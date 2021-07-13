@@ -5,9 +5,11 @@ import { useSelector } from "react-redux";
 import { selectUser } from "./../features/userSlice";
 import { auth } from "../firebase";
 import PlansScreen from "./PlansScreen";
+import { selectSubscription } from "./../features/subscriptionSlice";
 
 function ProfileScreen() {
   const user = useSelector(selectUser);
+  const subscription = useSelector(selectSubscription);
 
   return (
     <div className="profileScreen">
@@ -23,8 +25,16 @@ function ProfileScreen() {
           <div className="profileScreen_details">
             <h2>{user.email}</h2>
             <div className="profileScreen_plans">
+              {!subscription ? (
+                <h5>Select A Plan :</h5>
+              ) : (
+                <h5>
+                  Current Subscription : {subscription.role.toUpperCase()}
+                </h5>
+              )}
+              <br />
               <h3>Plans</h3>
-              <PlansScreen PlansScreen />
+              <PlansScreen />
               <button
                 onClick={() => auth.signOut()}
                 className="profileScreen_signOut"

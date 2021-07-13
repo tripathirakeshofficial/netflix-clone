@@ -1,16 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { useHistory } from "react-router-dom";
 import "./Nav.css";
+import { useSelector } from "react-redux";
+import { selectSubscription } from "./features/subscriptionSlice";
 
 function Nav() {
   const [show, handleShow] = useState(false);
   const history = useHistory();
+  const subscription = useSelector(selectSubscription);
 
   const transitionNavBar = () => {
     if (window.scrollY > 100) {
       handleShow(true);
     } else {
       handleShow(false);
+    }
+  };
+
+  const handleClick = () => {
+    if (subscription) {
+      history.push("/");
     }
   };
 
@@ -23,7 +32,7 @@ function Nav() {
     <div className={`nav ${show && `nav_black`}`}>
       <div className="nav_contents">
         <img
-          onClick={() => history.push("/")}
+          onClick={handleClick}
           className="nav_logo"
           src="http://assets.stickpng.com/images/580b57fcd9996e24bc43c529.png"
           alt=""

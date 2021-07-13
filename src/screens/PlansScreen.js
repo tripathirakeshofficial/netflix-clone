@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
 import "./PlansScreen.css";
 import db from "./../firebase";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { selectUser } from "./../features/userSlice";
 import { loadStripe } from "@stripe/stripe-js";
+import {
+  setSubscription,
+  selectSubscription,
+} from "./../features/subscriptionSlice";
 
 function PlansScreen() {
   const [products, setProducts] = useState([]);
   const user = useSelector(selectUser);
-  const [subscription, setSubscription] = useState(null);
+  const subscription = useSelector(selectSubscription);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     db.collection("customers")
@@ -17,15 +22,18 @@ function PlansScreen() {
       .get()
       .then((querySnapshot) => {
         querySnapshot.forEach(async (subscription) => {
-          setSubscription({
-            role: subscription.data().role,
-            current_period_end: subscription.data().current_period_end.seconds,
-            current_period_start:
-              subscription.data().current_period_start.seconds,
-          });
+          dispatch(
+            setSubscription({
+              role: subscription.data().role,
+              current_period_end:
+                subscription.data().current_period_end.seconds,
+              current_period_start:
+                subscription.data().current_period_start.seconds,
+            })
+          );
         });
       });
-  }, [user.uid]);
+  }, [user.uid, dispatch]);
 
   useEffect(() => {
     db.collection("products")
@@ -88,33 +96,47 @@ function PlansScreen() {
       )}
 
       {Object.entries(products).map(([productId, productData]) => {
-        //add some logic to check if the user's subscription is active.....
+        //add some logic to check if the user's subscription is active....
 
-        const isCurrentPackage = productData.name
-          ?.replace(/ .*/, "")
-          .toLowerCase()
-          .includes(subscription.role);
+        if (subscription) {
+          const isCurrentPackage = productData.name
+            ?.replace(/ .*/, "")
+            .toLowerCase()
+            .includes(subscription.role);
 
-        return (
-          <div
-            key={productId}
-            className={`${
-              isCurrentPackage && "plansScreen_plan--disabled"
-            } plansScreen_plan`}
-          >
-            <div className="planScreen_info">
-              <h5>{productData.name}</h5>
-              <h6>{productData.description}</h6>
-            </div>
-            <button
-              onClick={() =>
-                !isCurrentPackage && loadCheckout(productData.prices.priceId)
-              }
+          return (
+            <div
+              key={productId}
+              className={`${
+                isCurrentPackage && "plansScreen_plan--disabled"
+              } plansScreen_plan`}
             >
-              {isCurrentPackage ? "Current Package" : "Subscribe"}
-            </button>
-          </div>
-        );
+              <div className="planScreen_info">
+                <h5>{productData.name}</h5>
+                <h6>{productData.description}</h6>
+              </div>
+              <button
+                onClick={() =>
+                  !isCurrentPackage && loadCheckout(productData.prices.priceId)
+                }
+              >
+                {isCurrentPackage ? "Current Package" : "Subscribe"}
+              </button>
+            </div>
+          );
+        } else {
+          return (
+            <div key={productId} className="plansScreen_plan">
+              <div className="planScreen_info">
+                <h5>{productData.name}</h5>
+                <h6>{productData.description}</h6>
+              </div>
+              <button onClick={() => loadCheckout(productData.prices.priceId)}>
+                Subscribe
+              </button>
+            </div>
+          );
+        }
       })}
     </div>
   );
